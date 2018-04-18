@@ -7,7 +7,7 @@
 usage()
 {
         echo "Usage: $1 {account-name} {namespace} {targetNamespaces} [OPTIONS]"
-        echo "OPTIONS: -o <output_file> | --output=<output_file>"
+        echo "OPTIONS: -o <output_file> | --output=<output_file> -m"
         echo "for example:"
         echo "$1 weblogic-operator-account weblogic-operator-namespace default -o /home/kubernetes/security_example.yaml"
 }
@@ -44,6 +44,11 @@ else
     shift
 fi
 
+if [ "$1" = "-m" ] ; then
+        shift
+        FOR_HELM="true"
+fi
+
 if [ "$1" = "-o" ] ; then
         shift
         SCRIPT="$1"
@@ -53,11 +58,15 @@ else
         SCRIPT=$SCRIPT_DEFAULT
 fi
 
+echo FOR_HELM ${FOR_HELM}
+echo SCRIPT ${SCRIPT}
+
 #
 # Create namespace and service account
 #
 echo "..."
 echo "Generating YAML script ${SCRIPT} to create WebLogic Operator security configuration..."
+if [ -z ${FOR_HELM} ] ; then
 cat > ${SCRIPT}  <<EOF
 #
 # Namespace for WebLogic Operator
@@ -69,6 +78,10 @@ metadata:
   labels:
     weblogic.operatorName: ${NAMESPACE}
 ---
+EOF
+
+fi
+cat >> ${SCRIPT}  <<EOF
 #
 # Service Account for WebLogic Operator
 #
@@ -94,11 +107,8 @@ metadata:
     weblogic.operatorName: ${NAMESPACE}
 rules:
 - apiGroups: [""]
-  resources: ["namespaces"]
+  resources: ["namespaces", "persistentvolumes"]
   verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["persistentvolumes"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
@@ -111,12 +121,6 @@ rules:
 - apiGroups: ["extensions"]
   resources: ["ingresses"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
-- apiGroups: ["authentication.k8s.io"]
-  resources: ["tokenreviews"]
-  verbs: ["create"]
-- apiGroups: ["authorization.k8s.io"]
-  resources: ["selfsubjectaccessreviews", "localsubjectaccessreviews", "subjectaccessreviews", "selfsubjectrulesreviews"]
-  verbs: ["create"]
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -206,13 +210,13 @@ metadata:
     weblogic.operatorName: ${NAMESPACE}
 rules:
 - apiGroups: [""]
-  resources: ["secrets"]
+  resources: ["secrets", "persistentvolumeclaims"]
   verbs: ["get", "list", "watch"]
 - apiGroups: ["storage.k8s.io"]
   resources: ["storageclasses"]
   verbs: ["get", "list", "watch"]
 - apiGroups: [""]
-  resources: ["services", "configmaps", "pods", "podtemplates", "events", "persistentvolumeclaims"]
+  resources: ["services", "configmaps", "pods", "jobs", "events"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
 - apiGroups: [""]
   resources: ["pods/logs"]
@@ -220,9 +224,6 @@ rules:
 - apiGroups: [""]
   resources: ["pods/exec"]
   verbs: ["create"]
-- apiGroups: ["batch"]
-  resources: ["jobs", "cronjobs"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
 - apiGroups: ["settings.k8s.io"]
   resources: ["podpresets"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
@@ -232,6 +233,7 @@ rules:
 ---
 EOF
 
+if [ -z ${FOR_HELM} ] ; then
   # Generate a RoleBinding for each target namespace
   for i in ${TARGET_NAMESPACES//,/ }
   do
@@ -258,6 +260,37 @@ roleRef:
 ---
 EOF
   done
+
+else
+
+cat >> ${SCRIPT} <<EOF
+#
+# creating role-bindings helm template
+#
+{{- \$relname := .Release.Namespace -}}
+{{- \$serviceaccount := .Values.serviceAccount -}}
+{{- range .Values.targetNamespacesList }}
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: weblogic-operator-rolebinding
+  namespace: {{ . }}
+  labels:
+    weblogic.operatorName: {{ \$relname }}
+subjects:
+- kind: ServiceAccount
+  name: {{ \$serviceaccount }}
+  namespace: {{ \$relname }}
+  apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: weblogic-operator-namespace-role
+  apiGroup: ""
+---
+{{- end }}
+EOF
+
+fi
 
 
 #
