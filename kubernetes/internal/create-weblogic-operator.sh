@@ -96,14 +96,6 @@ function initialize {
     validationError "The template file ${oprInput} for generating the weblogic operator was not found"
   fi
 
-  if [ "${generateHelm}" = true ]; then
-    saInput="${scriptDir}/serviceaccount-template.yaml"
-    saOutput="${oprOutputDir}/serviceaccount.yaml"
-    if [ ! -f ${oprInput} ]; then
-      validationError "The template file ${saInput} for generating the service account was not found"
-    fi
-  fi
-
   if [ ! -f ${genOprCertScript} ]; then
     validationError "The file ${genOprCertScript} for generating the weblogic operator certificates was not found"
   fi
