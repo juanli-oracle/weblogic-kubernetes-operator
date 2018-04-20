@@ -16,6 +16,7 @@
 #
 
 box:
+  command-timeout: 60
   id: store/oracle/serverjre
   username: $DOCKER_USERNAME
   password: $DOCKER_PASSWORD
