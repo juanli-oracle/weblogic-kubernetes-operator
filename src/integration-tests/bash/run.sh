@@ -95,6 +95,9 @@
 #   NODEPORT_HOST  DNS name of a Kubernetes worker node.  
 #                  Default is the local host's hostname.
 #
+#   NFS_SERVER     DNS name of IP address of NFS server
+#                  Default is NODEPORT_HOST
+#
 #   JVM_ARGS       JVM_ARGS to pass to WebLogic Servers.
 #                  Default is "-Dweblogic.StdoutDebugEnabled=false".
 #
@@ -811,9 +814,11 @@ function run_create_domain_job {
     sed -i -e "s/^exposeAdminT3Channel:.*/exposeAdminT3Channel: true/" $inputs
 
     # Customize more configuration 
-    if [ "$DOMAIN_UID" == "domain5" ] && [ "$JENKINS" = "true" ] ; then
-      sed -i -e "s/^weblogicDomainStorageType:.*/weblogicDomainStorageType: NFS/" $inputs
-      sed -i -e "s/^#weblogicDomainStorageNFSServer:.*/weblogicDomainStorageNFSServer: $NODEPORT_HOST/" $inputs
+    if [ "$DOMAIN_UID" == "domain5" ] ; then
+      if [ "$JENKINS" = "true" ] || [ "$WERCKER" = "true" ] ; then
+        sed -i -e "s/^weblogicDomainStorageType:.*/weblogicDomainStorageType: NFS/" $inputs
+        sed -i -e "s/^#weblogicDomainStorageNFSServer:.*/weblogicDomainStorageNFSServer: $NFS_SERVER/" $inputs
+      fi
     fi
     sed -i -e "s;^#weblogicDomainStoragePath:.*;weblogicDomainStoragePath: $PV_ROOT/acceptance_test_pv/$DOMAIN_STORAGE_DIR;" $inputs
     sed -i -e "s/^#domainUID:.*/domainUID: $DOMAIN_UID/" $inputs
@@ -2468,6 +2473,7 @@ function test_suite_init {
     export RESULT_ROOT=${RESULT_ROOT:-/scratch/$USER/wl_k8s_test_results}
     export PV_ROOT=${PV_ROOT:-$RESULT_ROOT}
     export NODEPORT_HOST=${K8S_NODEPORT_HOST:-`hostname | awk -F. '{print $1}'`}
+    export NFS_SERVER=${$NFS_SERVER:-$NODEPORT_HOST}
     export JVM_ARGS="${JVM_ARGS:-'-Dweblogic.StdoutDebugEnabled=false'}"
     export BRANCH_NAME="${BRANCH_NAME:-$WERCKER_GIT_BRANCH}"
 

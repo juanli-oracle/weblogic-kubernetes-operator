@@ -170,6 +170,7 @@ integration-test:
       export HOST_PATH="/scratch"
       export PV_ROOT=$HOST_PATH
       export RESULT_ROOT="$WERCKER_OUTPUT_DIR/k8s_dir"
+      export NFS_SERVER=$OCI_K8S_NFS_SERVER
       mkdir -m 777 -p $RESULT_ROOT
       export PROJECT_ROOT="${WERCKER_SOURCE_DIR}"
       $WERCKER_SOURCE_DIR/src/integration-tests/bash/cleanup.sh
