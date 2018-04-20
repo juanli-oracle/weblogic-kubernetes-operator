@@ -2473,7 +2473,7 @@ function test_suite_init {
     export RESULT_ROOT=${RESULT_ROOT:-/scratch/$USER/wl_k8s_test_results}
     export PV_ROOT=${PV_ROOT:-$RESULT_ROOT}
     export NODEPORT_HOST=${K8S_NODEPORT_HOST:-`hostname | awk -F. '{print $1}'`}
-    export NFS_SERVER=${$NFS_SERVER:-$NODEPORT_HOST}
+    export NFS_SERVER=${NFS_SERVER:-$NODEPORT_HOST}
     export JVM_ARGS="${JVM_ARGS:-'-Dweblogic.StdoutDebugEnabled=false'}"
     export BRANCH_NAME="${BRANCH_NAME:-$WERCKER_GIT_BRANCH}"
 
