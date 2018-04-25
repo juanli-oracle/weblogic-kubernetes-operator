@@ -278,7 +278,7 @@ cat >> ${SCRIPT} <<EOF
 #
 {{- \$relname := .Release.Namespace -}}
 {{- \$serviceaccount := .Values.serviceAccount -}}
-{{- range .Values.targetNamespacesList }}
+{{- range .Values.targetNamespaces }}
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:

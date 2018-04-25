@@ -14,7 +14,7 @@ namespace: "{{ .Release.Namespace }}"
 
 # A comma-separated list of target namespaces the operator manages
 # The names must be lowercase
-targetNamespaces: "{{ .Values.targetNamespaces \| nospace }}"
+targetNamespaces: "{{- range \$index, \$targetnamespace := .Values.targetNamespaces }} {{- if \$index }},{{ end }}{{- \$targetnamespace }} {{- end }}"
 
 # The docker image containing the operator code.
 weblogicOperatorImage: "{{ .Values.image }}"

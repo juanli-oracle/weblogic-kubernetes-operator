@@ -373,13 +373,6 @@ function createYamlFiles {
 
   # Processing specific when generating helm chart templates
   if [ "${generateHelm}" = true ]; then
-    # Generate the yaml to create the service account
-    saOutput="${oprOutputDir}/serviceaccount.yaml"
-    echo Generating ${saOutput}
-    cp ${saInput} ${saOutput}
-    sed -i -e "s|%NAMESPACE%|$namespace|g" ${saOutput}
-    sed -i -e "s|%ACCOUNT_NAME%|$serviceAccount|g" ${saOutput}
-
     # Generate the kibana.yaml and elasticsearch.yaml files
     # These files are optional based on the value of elkIntegrationOption
     kibanaOutput="${oprOutputDir}/kibana.yaml"
