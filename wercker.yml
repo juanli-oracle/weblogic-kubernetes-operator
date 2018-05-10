@@ -74,7 +74,9 @@ build:
       #!/bin/bash
       export PATH=$PATH:$WERCKER_CACHE_DIR
       CLAIR_OUTPUT=High CLAIR_ADDR=http://129.146.68.168:30060 CLAIR_TIMEOUT=10 DOCKER_TIMEOUT=10 DOCKER_USER=juanlioracle DOCKER_PASSWORD=dockerjuanli1 DOCKER_INSECURE=true REGISTRY_INSECURE=true JSON_OUTPUT=true klar-2.0.2-linux-amd64 juanlioracle/weblogic-kubernetes-operator
-      CLAIR_OUTPUT=Low CLAIR_ADDR=http://129.146.68.168:30060 CLAIR_TIMEOUT=10 DOCKER_TIMEOUT=10 DOCKER_USER=juanlioracle DOCKER_PASSWORD=dockerjuanli1 DOCKER_INSECURE=true REGISTRY_INSECURE=true JSON_OUTPUT=true klar-2.0.2-linux-amd64 juanlioracle/weblogic-kubernetes-operator
+      CLAIR_OUTPUT=Low CLAIR_ADDR=http://129.146.68.168:30060 CLAIR_TIMEOUT=10 DOCKER_TIMEOUT=10 DOCKER_USER=juanlioracle DOCKER_PASSWORD=dockerjuanli1 DOCKER_INSECURE=true REGISTRY_INSECURE=true JSON_OUTPUT=true klar-2.0.2-linux-amd64 juanlioracle/weblogic-kubernetes-operator > $WERCKER_CACHE_DIR/clair-scan-report.json 2>&1
+      echo "% ls -alF $WERCKER_CACHE_DIR"
+      ls -alF $WERCKER_CACHE_DIR
       echo "% Scan finished"
       trap finish EXIT
 
