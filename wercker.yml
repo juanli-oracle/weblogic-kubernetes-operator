@@ -68,6 +68,11 @@ build:
     working-dir: "/operator"
     cmd: "operator.sh"
     env: "PATH=$PATH:/operator"
+  - script:
+    name: Security Scan
+    code:
+      CLAIR_OUTPUT=High CLAIR_ADDR=http://129.146.68.168:30060 CLAIR_TIMEOUT=10 DOCKER_TIMEOUT=10 DOCKER_USER=juanlioracle DOCKER_PASSWORD=dockerjuanli1 DOCKER_INSECURE=true REGISTRY_INSECURE=true JSON_OUTPUT=true $WERCKER_CACHE_DIR/./klar-2.0.2-linux-amd64 juanlioracle/weblogic-kubernetes-operator
+      echo "% Scan finished"
 
 dev:
   steps:
