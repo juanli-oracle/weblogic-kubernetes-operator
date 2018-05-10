@@ -33,6 +33,7 @@ build:
     name: Install pre-reqs
     code: |
       yum -y install tar gzip procps
+      cp -r src/resources/* $WERCKER_CACHE_DIR
   - wercker/maven:
     goals: clean install
     version: 3.5.2
